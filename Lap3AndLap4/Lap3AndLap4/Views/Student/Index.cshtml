@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Student>
+
+<h2>Danh sách sinh viên</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Thêm mới sinh viên</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Mã SV</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Ngành</th>
+            <th>Giới tính</th>
+            <th>Địa chỉ</th>
+            <th>Ngày sinh</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.Email</td>
+                <td>@item.Branch</td>
+                <td>@item.Gender</td>
+                <td>@item.Address</td>
+                <td>@item.DateOfBirth</td>
+            </tr>
+        }
+    </tbody>
+</table>

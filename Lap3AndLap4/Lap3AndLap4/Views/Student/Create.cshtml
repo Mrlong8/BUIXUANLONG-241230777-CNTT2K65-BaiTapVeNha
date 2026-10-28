@@ -1,0 +1,88 @@
+﻿@model Lap3AndLap4.Models.Student
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-controller="Student" asp-action="Create" method="post" class="mt-3">
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Name" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Name" class="form-control" placeholder="Họ tên">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Email" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Email" class="form-control" placeholder="Email">
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Password" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Password">
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Branch" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <select asp-for="Branch" class="custom-select mr-sm-2" asp-items="Html.GetEnumSelectList<Branch>()"></select>
+            <span asp-validation-for="Branch" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="IsRegular" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input type="checkbox" class="custom-control-input" asp-for="IsRegular">
+            <span asp-validation-for="IsRegular" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="DateOfBirth" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="DateOfBirth" class="form-control">
+            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Gender" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            @foreach (var gender in ViewBag.AllGenders)
+            {
+                <label class="radio-inline mr-3">
+                    <input type="radio" asp-for="Gender" value="@gender" id="Gender@(gender)" /> @gender
+                </label>
+            }
+            <span asp-validation-for="Gender" class="text-danger d-block"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Address" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <textarea asp-for="Address" class="form-control" placeholder="Địa chỉ"></textarea>
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+    </div>
+
+    @* <div style="margin-top:7px" class="form-group row">
+        <label asp-for="Score" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Score" class="form-control" placeholder="Nhập điểm (0.0 - 10.0)">
+            <span asp-validation-for="Score" class="text-danger"></span>
+        </div>
+    </div> *@
+
+    <div style="margin-top: 10px" class="form-group row">
+        <div class="col-sm-10 offset-sm-2">
+            <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+    </div>
+</form>
