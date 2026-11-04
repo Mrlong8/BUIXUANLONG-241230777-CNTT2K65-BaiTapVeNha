@@ -2,35 +2,67 @@
 @{
     ViewData["Title"] = "Index";
 }
-<h1>Index</h1>
+
+<h1>Learner List</h1>
 @await Component.InvokeAsync("Major")
-<p><a class="btn btn-success" asp-action="Create">Create New</a></p>
+
+<form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+    <div class="input-group">
+        <input id="keyword" class="form-control" name="keyword" type="text" placeholder="Search learner" />
+        <button id="btnSearch" class="btn btn-primary" type="button">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </div>
+</form>
+
 <div id="content">
     @await Html.PartialAsync("LearnerTable", Model)
 </div>
 
+<a asp-action="Create" class="btn btn-primary mt-3">Create New Student</a>
+
 @section Scripts {
     <script>
         $(document).ready(function () {
+            $('body').on('click', 'li.page-item', function (e) {
+                var page = $(this).attr("page");
+                var mid = $(this).attr("mid");
+                var keyword = $(this).attr("keyword");
+                var data = { mid: mid, keyword: keyword, pageIndex: page };
+
+                $.ajax({
+                    url: '@Url.Action("LearnerFilter", "Learner")',
+                    data: data,
+                    success: function (response) {
+                        $("div#content").html(response);
+                    }
+                });
+            });
+
             $('#major-list').on('click', 'a', function (e) {
                 e.preventDefault();
-
                 $('#major-list a').removeClass('active');
                 $(this).addClass('active');
 
                 var id = $(this).data('id');
-                console.log("Major ID:", id);
 
                 $.ajax({
-                    url: '@Url.Action("LearnerByMajorID", "Learner")',
-                    type: 'GET',
-                    data: { id: id },
+                    url: '@Url.Action("LearnerFilter", "Learner")',
+                    data: { mid: id },
                     success: function (response) {
-                        $('#content').html(response);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Lỗi AJAX:", error);
-                        console.log(xhr.responseText);
+                        $("div#content").html(response);
+                    }
+                });
+            });
+
+            $("button#btnSearch").click(function (e) {
+                var keyword = $("#keyword").val();
+
+                $.ajax({
+                    url: '@Url.Action("LearnerFilter", "Learner")',
+                    data: { keyword: keyword },
+                    success: function (response) {
+                        $("div#content").html(response);
                     }
                 });
             });

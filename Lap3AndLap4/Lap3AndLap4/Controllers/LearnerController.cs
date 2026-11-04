@@ -2,30 +2,67 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Lap3AndLap4.Models;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 public class LearnerController : Controller
 {
     private readonly DBContext _context;
+    private int pageSize = 3;
 
     public LearnerController(DBContext context)
     {
         _context = context;
     }
 
+
     public async Task<IActionResult> Index(int? id)
     {
-        if (id == null)
+        var query = _context.Learners.Include(l => l.Major).AsQueryable();
+
+        if (id.HasValue)
         {
-            var learners = await _context.Learners.Include(l => l.Major).ToListAsync();
-            return View(learners);
+            query = query.Where(l => l.MajorID == id.Value);
         }
-        else
+
+        int totalItems = await query.CountAsync();
+        int pageNumber = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        ViewBag.pageNumber = pageNumber;
+
+        var result = await query.Take(pageSize).ToListAsync();
+
+        return View(result);
+    }
+
+    public IActionResult LearnerFilter(int? mid, string? keyword, int? pageIndex)
+    {
+        var learners = _context.Learners.AsQueryable();
+
+        int page = pageIndex == null || pageIndex <= 0 ? 1 : pageIndex.Value;
+
+        if (mid != null)
         {
-            var learners = await _context.Learners
-                .Include(l => l.Major)
-                .Where(l => l.MajorID == id).ToListAsync();
-            return View(learners);
+            learners = learners.Where(l => l.MajorID == mid);
+            ViewBag.mid = mid;
         }
+
+        if (keyword != null)
+        {
+            learners = learners.Where(l => l.FirstMidName.ToLower().Contains(keyword.ToLower()));
+            ViewBag.keyword = keyword;
+        }
+
+        int pageNum = (int)Math.Ceiling(learners.Count() / (float)pageSize);
+        ViewBag.pageNum = pageNum;
+
+        var result = learners.Skip(pageSize * (page - 1))
+                             .Take(pageSize)
+                             .Include(m => m.Major);
+
+        return PartialView("LearnerTable", result);
     }
 
     public IActionResult LearnerByMajorID(int? id)
@@ -44,6 +81,7 @@ public class LearnerController : Controller
         return PartialView("LearnerTable", learners);
     }
 
+  
     public async Task<IActionResult> Details(int? id, int? learnerid)
     {
         var targetId = id ?? learnerid;
@@ -59,10 +97,10 @@ public class LearnerController : Controller
 
     public IActionResult Create()
     {
-        // Truyền danh sách Major sang View để làm thẻ Select
         ViewBag.MajorID = new SelectList(_context.Majors, "MajorID", "MajorName");
         return View();
     }
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -93,6 +131,7 @@ public class LearnerController : Controller
         ViewBag.MajorID = new SelectList(_context.Majors, "MajorID", "MajorName", learner.MajorID);
         return View(learner);
     }
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -131,6 +170,7 @@ public class LearnerController : Controller
         return View(learner);
     }
 
+
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int? id, int? learnerid)
@@ -144,6 +184,7 @@ public class LearnerController : Controller
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
+
 
     private bool LearnerExists(int? learnerid)
     {
