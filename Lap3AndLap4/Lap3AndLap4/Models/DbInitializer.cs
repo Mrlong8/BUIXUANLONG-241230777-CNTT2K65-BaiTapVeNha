@@ -24,7 +24,10 @@ namespace Lap3AndLap4.Models
                 {
                     new Major { MajorName = "IT" },
                     new Major { MajorName = "Economics" },
-                    new Major { MajorName = "Mathematics" }
+                    new Major { MajorName = "Mathematics" },
+                    new Major { MajorName = "BA" },
+                    new Major { MajorName = "TA" },
+                    new Major { MajorName = "KT" }
                 };
                 foreach (var major in majors)
                 {

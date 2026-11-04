@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Lap3AndLap4.Models; // Đảm bảo đúng namespace
+using Lap3AndLap4.Models;
 
 public class LearnerController : Controller
 {
@@ -12,18 +12,46 @@ public class LearnerController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int? id)
     {
-        return View(await _context.Learners.Include(l => l.Major).ToListAsync());
+        if (id == null)
+        {
+            var learners = await _context.Learners.Include(l => l.Major).ToListAsync();
+            return View(learners);
+        }
+        else
+        {
+            var learners = await _context.Learners
+                .Include(l => l.Major)
+                .Where(l => l.MajorID == id).ToListAsync();
+            return View(learners);
+        }
     }
 
-    public async Task<IActionResult> Details(int? learnerid)
+    public IActionResult LearnerByMajorID(int? id)
     {
-        if (learnerid == null) return NotFound();
+        if (id == null)
+        {
+            var allLearners = _context.Learners.Include(l => l.Major).ToList();
+            return PartialView("LearnerTable", allLearners);
+        }
+
+        var learners = _context.Learners
+            .Where(l => l.MajorID == id)
+            .Include(l => l.Major)
+            .ToList();
+
+        return PartialView("LearnerTable", learners);
+    }
+
+    public async Task<IActionResult> Details(int? id, int? learnerid)
+    {
+        var targetId = id ?? learnerid;
+        if (targetId == null) return NotFound();
 
         var learner = await _context.Learners
             .Include(l => l.Major)
-            .FirstOrDefaultAsync(m => m.LearnerID == learnerid);
+            .FirstOrDefaultAsync(m => m.LearnerID == targetId);
 
         if (learner == null) return NotFound();
         return View(learner);
@@ -54,11 +82,12 @@ public class LearnerController : Controller
         return View(learner);
     }
 
-    public async Task<IActionResult> Edit(int? learnerid)
+    public async Task<IActionResult> Edit(int? id, int? learnerid)
     {
-        if (learnerid == null) return NotFound();
+        var targetId = id ?? learnerid;
+        if (targetId == null) return NotFound();
 
-        var learner = await _context.Learners.FindAsync(learnerid);
+        var learner = await _context.Learners.FindAsync(targetId);
         if (learner == null) return NotFound();
 
         ViewBag.MajorID = new SelectList(_context.Majors, "MajorID", "MajorName", learner.MajorID);
@@ -67,9 +96,9 @@ public class LearnerController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? learnerid, [Bind("LearnerID,LastName,FirstMidName,EnrollmentDate,MajorID")] Learner learner)
+    public async Task<IActionResult> Edit(int? id, [Bind("LearnerID,LastName,FirstMidName,EnrollmentDate,MajorID")] Learner learner)
     {
-        if (learnerid != learner.LearnerID) return NotFound();
+        if (id != learner.LearnerID) return NotFound();
 
         if (ModelState.IsValid)
         {
@@ -89,13 +118,14 @@ public class LearnerController : Controller
         return View(learner);
     }
 
-    public async Task<IActionResult> Delete(int? learnerid)
+    public async Task<IActionResult> Delete(int? id, int? learnerid)
     {
-        if (learnerid == null) return NotFound();
+        var targetId = id ?? learnerid;
+        if (targetId == null) return NotFound();
 
         var learner = await _context.Learners
             .Include(l => l.Major)
-            .FirstOrDefaultAsync(m => m.LearnerID == learnerid);
+            .FirstOrDefaultAsync(m => m.LearnerID == targetId);
 
         if (learner == null) return NotFound();
         return View(learner);
@@ -103,9 +133,10 @@ public class LearnerController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? learnerid)
+    public async Task<IActionResult> DeleteConfirmed(int? id, int? learnerid)
     {
-        var learner = await _context.Learners.FindAsync(learnerid);
+        var targetId = id ?? learnerid;
+        var learner = await _context.Learners.FindAsync(targetId);
         if (learner != null)
         {
             _context.Learners.Remove(learner);
